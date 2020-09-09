@@ -1,46 +1,58 @@
 const Telegraf = require('telegraf')
 const Markup = require('telegraf/markup')
+const User = require('./model/User')
+
+let replyOptions;
+let extraParams = {
+    parse_mode: 'HTML',
+    disable_notification: true,
+    disable_web_page_preview: true,
+    reply_markup: replyOptions
+}
+
 
 exports.start = (config) => {
     const bot = new Telegraf(process.env.BOT_TOKEN)
     bot.start((ctx) => {
-        ctx.reply('Describe lot')
+        console.log(ctx);
+        ctx.reply('Hello, I\'m hw-market bot. Here you can describe whatever you\'re going to sell related to hardware.')
     })
     bot.help((ctx) => ctx.reply('Help'))
     bot.on('sticker', (ctx) => ctx.reply('👍'))
+
     bot.on('text', (ctx) => {
         const message = ctx.message;
         const lotInfo = message.text;
-        const user = {
-            id: message.from.id,
-            name: message.from.first_name,
-            surname: message.from.last_name,
-            getMentionById: function() {
-                return `#id${this.id}`
-            },
-            getMentionByFullNameMarkdown: function() {
-                //[inline mention of a user](tg://user?id=123456789)
-                return `[${this.name} ${this.surname}](tg://user?id=${this.id})`
-            },
-            getMentionByFullNameHtml: function() {
-                return `<a href="tg://user?id=${this.id}">${this.getFullName()}</a>[${this.getMentionById()}]`
-            },
-            getFullName: function() {
-                return `${this.name} ${this.surname}`
-            }
-        };
+        const user = new User(message.from.id, message.from.first_name, message.from.last_name);
         console.log(JSON.stringify(message))
 
-        const formattedMessage = `
-            ${user.getMentionByFullNameHtml()}\n
-            Лот: ${lotInfo}
-        `
-        const extraParams = {
-            parse_mode: 'HTML'
-        }
+        const formattedMessage = `\nОт: ${user.getMentionByFullNameHtml()}\nЛот: ${lotInfo}`
+
+        replyOptions = Markup.inlineKeyboard([
+            Markup.callbackButton('Добро', `allow${user.id}`),
+            Markup.callbackButton('Говно', `deny${user.id}`)
+        ])
+        extraParams.reply_markup = replyOptions;
+        //   .extra()
 
         ctx.telegram.sendMessage(process.env.MODERATION_CHAT_ID, formattedMessage, extraParams)
-      })
-      
+    })
+
+    bot.action(/^allow([0-9]+)$/, (ctx) => {
+        const userId = ctx.match[1];
+        replyOptions = Markup.inlineKeyboard([
+            Markup.callbackButton('Продано', `sold${userId}`)
+        ])
+        extraParams.reply_markup = replyOptions;
+        ctx.telegram.sendMessage(userId, `Оп! Модерация рассмотрела и одобрила твой лот. Обнови статус лота после продажи`, extraParams)
+        ctx.reply('Окей, закрываю лот.')
+    })
+    bot.action(/^deny([0-9]+)$/, (ctx) => {
+        const userId = ctx.match[1];
+        const reasonMessage = '-';
+        ctx.telegram.sendMessage(userId, `Извини, но твой лот не был одобрен модерацией.\nПричина: ${reasonMessage}`)
+    })
+
+
     bot.launch()
 }
