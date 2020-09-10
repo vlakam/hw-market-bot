@@ -1,4 +1,4 @@
-class User {
+export class User {
     constructor(id, name, surname) {
         this.id = id;
         this.name = name;
@@ -21,5 +21,3 @@ class User {
         return `<a href="tg://user?id=${this.id}">${this.getFullName()}</a> [${this.getMentionById()}]`
     }
 }
-
-module.exports = User;
