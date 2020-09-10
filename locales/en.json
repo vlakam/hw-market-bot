@@ -1,3 +1,4 @@
 {
-    "start": "Hello, I'm hw-market bot. Here you can describe whatever you're going to sell related to hardware."
+    "start": "Hello, I'm hw-market bot. Here you can describe whatever you're going to sell related to hardware.",
+    "help": "Welp"
 }
