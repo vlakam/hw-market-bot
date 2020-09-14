@@ -1,13 +1,8 @@
 const { Markup, Extra } = require('telegraf');
 const User = require('../models/User');
 
-let { MODERATION_CHAT_ID: moderatorsChatIdString } = process.env;
-if (!moderatorsChatIdString) {
-    console.log('MODERATION_CHAT_ID is unspecified.');
-    moderatorsChatIdString = '123'; // type coercion
-}
+const { MODERATION_CHAT_ID } = process.env;
 
-const moderatorsChatId = parseInt(moderatorsChatIdString);
 const handleMessage = async (ctx) => {
     if (ctx.chat && ctx.chat.type === 'private') {
         // заявка на объявление
@@ -33,7 +28,7 @@ const handleMessage = async (ctx) => {
         // });
 
         const { message_id: reviewMessageId } = await ctx.telegram.sendMessage(
-            moderatorsChatId,
+            MODERATION_CHAT_ID,
             formattedMessage,
             Extra.HTML(),
             // Extra.HTML().markup((m: Markup) => {
@@ -46,7 +41,7 @@ const handleMessage = async (ctx) => {
         const infoString = `${from.id}_${message_id}_${reviewMessageId}`;
 
         await ctx.telegram.editMessageReplyMarkup(
-            moderatorsChatId,
+            MODERATION_CHAT_ID,
             reviewMessageId,
             undefined,
             Markup.inlineKeyboard([
@@ -62,7 +57,7 @@ const handleMessage = async (ctx) => {
         // await user.save();
 
         return ctx.reply('Принято к рассмотрению');
-    } else if (ctx.chat && ctx.chat.id === moderatorsChatId) {
+    } else if (ctx.chat && ctx.chat.id === MODERATION_CHAT_ID) {
         // модераторы рофлят
 
         const message = ctx.message;
@@ -86,7 +81,7 @@ const handleMessage = async (ctx) => {
         });
 
         await ctx.telegram.editMessageReplyMarkup(
-            moderatorsChatId,
+            MODERATION_CHAT_ID,
             replyTo.message_id,
             undefined,
             Markup.inlineKeyboard([
