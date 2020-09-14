@@ -1,18 +1,13 @@
-import Telegraf from 'telegraf';
-import { Context } from 'telegraf';
-import { I18n } from 'telegraf-i18n';
-import { i18n } from './helpers/i18n';
-import { setupAllowCallback } from './handlers/Accept';
-import { setupDenyCallback } from './handlers/Deny';
-import { handleMessage } from './handlers/Message';
-
-export class ContextWithI18n extends Context {
-    i18n!: I18n;
-}
+const Telegraf = require('telegraf');
+const i18n = require('./helpers/i18n.js');
+const { setupAllowCallback } = require('./handlers/Accept');
+const { setupDenyCallback } = require('./handlers/Deny');
+const { handleMessage } = require('./handlers/Message');
+const { setupSoldCallback } = require('./handlers/Sold.js');
 
 const { BOT_TOKEN } = process.env;
 if (!BOT_TOKEN) throw 'BOT_TOKEN unspecified';
-const bot = new Telegraf<ContextWithI18n>(BOT_TOKEN);
+const bot = new Telegraf(BOT_TOKEN);
 
 bot.use(async (_, next) => {
     try {
@@ -35,7 +30,11 @@ bot.use(i18n.middleware());
 // bot.on('sticker', (ctx) => ctx.reply('👍'));
 
 bot.on('message', handleMessage);
+bot.action('dummybutton', (ctx) => {
+    return ctx.answerCbQuery('Ты зачем сюда жмешь?');
+})
 setupAllowCallback(bot);
 setupDenyCallback(bot);
+setupSoldCallback(bot);
 
-export default bot;
+module.exports = bot;
