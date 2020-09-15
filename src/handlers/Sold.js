@@ -10,14 +10,18 @@ const soldCallback = async (ctx) => {
         MODERATION_CHAT_ID,
         reviewMessageId,
         undefined,
-        Markup.inlineKeyboard([
-            Markup.callbackButton(`Продано`, 'dummybutton'),
-        ]),
+        Markup.inlineKeyboard([Markup.callbackButton(`Продано`, 'dummybutton')]),
     );
 
     await ctx.telegram.editMessageText(ctx.chat.id, message.message_id, undefined, 'Поздравляем с продажей!');
     if (replyTo) {
-        await ctx.telegram.editMessageText(PUBLICATION_CHANNEL_ID, publishedMessageId, undefined, `<b>Продано</b>\n<s>${message.reply_to_message.text}</s>`, Extra.HTML());
+        await ctx.telegram.editMessageText(
+            PUBLICATION_CHANNEL_ID,
+            publishedMessageId,
+            undefined,
+            `<b>Продано</b>\n<s>${message.reply_to_message.text}</s>`,
+            Extra.HTML(),
+        );
     } else {
         await ctx.telegram.deleteMessage(PUBLICATION_CHANNEL_ID, publishedMessageId);
     }
