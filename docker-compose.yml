@@ -11,21 +11,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
-  mongo:
-    restart: always
-    image: mongo:4
-    volumes:
-      - mongo-volume:/data/db
-    # ports:
-    #   - 127.0.0.1:27017:27017
-    networks:
-      - database_nw
-
-volumes:
-  mongo-volume:
-    driver: 'local'
-
-networks:
-  database_nw:
-    driver: bridge
